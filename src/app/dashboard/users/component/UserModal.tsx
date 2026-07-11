@@ -291,3 +291,4 @@ export default function UserModal({
       <div className="modal-backdrop fade show"></div>
     </>
   );
+}
