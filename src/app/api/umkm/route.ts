@@ -1,0 +1,1 @@
+import { createCollection, listCollection } from "@/lib/cms-api"; export const GET = () => listCollection("umkm"); export const POST = (request: Request) => createCollection(request, "umkm", ["admin", "operator"]);

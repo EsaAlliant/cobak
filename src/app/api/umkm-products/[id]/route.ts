@@ -1,0 +1,3 @@
+import { deleteCollection, updateCollection } from "@/lib/cms-api";
+export const PATCH = (request: Request, { params }: { params: Promise<{ id: string }> }) => params.then(({ id }) => updateCollection(request, "umkm_products", id, ["admin", "operator"]));
+export const DELETE = (_request: Request, { params }: { params: Promise<{ id: string }> }) => params.then(({ id }) => deleteCollection("umkm_products", id, ["admin", "operator"]));

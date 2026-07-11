@@ -1,0 +1,6 @@
+import Link from "next/link";
+import DashboardLayout from "@/components/DashboardLayout";
+import AdminPageHeader from "@/components/AdminPageHeader";
+
+const stats = [["Jumlah Berita", "0", "fa-newspaper", "hijau"], ["Jumlah UMKM", "0", "fa-store", "oranye"], ["Jumlah Galeri", "0", "fa-images", "biru"], ["Jumlah Event", "0", "fa-calendar-days", "ungu"], ["Jumlah Pengguna", "0", "fa-users", "merah"]];
+export default function DashboardPage() { return <DashboardLayout><AdminPageHeader eyebrow="Ringkasan" title="Selamat datang di CMS Desa" description="Pantau dan kelola informasi publik Desa Glagaharum dari satu tempat." /><section className="admin-stats">{stats.map(([label, value, icon, tone]) => <article className={`stat-card ${tone}`} key={label}><span><i className={`fa-solid ${icon}`} /></span><div><small>{label}</small><strong>{value}</strong></div></article>)}</section><section className="quick-section"><div><span className="eyebrow">Quick Action</span><h2>Mulai kelola konten</h2></div><div className="quick-actions"><Link href="/dashboard/website"><i className="fa-solid fa-plus" /> Tambah Berita</Link><Link href="/dashboard/umkm"><i className="fa-solid fa-plus" /> Tambah UMKM</Link><Link href="/dashboard/website"><i className="fa-solid fa-plus" /> Tambah Galeri</Link></div></section></DashboardLayout>; }
