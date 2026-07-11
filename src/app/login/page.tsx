@@ -5,18 +5,10 @@ import Link from "next/link";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { UserRole } from "@/lib/roles";
 import type { SessionPayload } from "@/lib/session";
 import { initialsFromText, useWebsiteSettings } from "@/lib/site-settings";
 import { setClientSessionCache } from "@/lib/client-session";
 import { useAuth } from "@/components/AuthContext";
-
-type ProfileRow = {
-  id: string;
-  name: string;
-  role: UserRole;
-  is_active: boolean | null;
-};
 
 function LoginForm() {
   const router = useRouter();
@@ -54,22 +46,11 @@ function LoginForm() {
       .eq("id", data.user.id)
       .maybeSingle();
 
-      
-
-    console.log("AUTH USER:", data.user);
-console.log("PROFILE:", profile);
-console.log("PROFILE ERROR:", profileError);
-
-if (profileError || !profile) {
-  setError(
-    JSON.stringify({
-      profile,
-      profileError,
-    })
-  );
-  setLoading(false);
-  return;
-}
+    if (profileError || !profile) {
+      setError("Data pengguna tidak ditemukan atau belum aktif.");
+      setLoading(false);
+      return;
+    }
 
     if (profile.is_active === false) {
       await supabase.auth.signOut();

@@ -1,0 +1,2 @@
+import DashboardLayout from "@/components/DashboardLayout"; import AdminPageHeader from "@/components/AdminPageHeader"; import ProfileForm from "@/components/ProfileForm";
+export default function ProfilePage() { return <DashboardLayout><AdminPageHeader eyebrow="Profil Saya" title="Profil akun" description="Perbarui nama, email, telepon, foto profil, dan password Anda." /><ProfileForm /></DashboardLayout>; }

@@ -1,3 +1,2 @@
-import PublicSiteShell from "@/components/PublicSiteShell";
-const agendas = [["15", "JUL", "Musyawarah Perencanaan Pembangunan", "Balai Desa Glagaharum"], ["22", "JUL", "Pelatihan Foto Produk UMKM", "Ruang Kreatif Desa"], ["03", "AGU", "Kerja Bakti Lingkungan", "Seluruh Wilayah Desa"]];
-export default function AgendaPage() { return <PublicSiteShell><main className="container page-section"><span className="eyebrow">Agenda Desa</span><h1>Jadwal kegiatan mendatang</h1><div className="agenda-list">{agendas.map(([day, month, title, place]) => <article key={title}><div className="date-block"><strong>{day}</strong><span>{month}</span></div><div><h2>{title}</h2><p><i className="fa-solid fa-location-dot" /> {place}</p></div><span className="agenda-status">Terjadwal</span></article>)}</div></main></PublicSiteShell>; }
+import PublicSiteShell from "@/components/PublicSiteShell"; import { PublicEvents } from "@/components/PublicDataViews";
+export default function AgendaPage() { return <PublicSiteShell><main className="container page-section"><span className="eyebrow">Agenda Desa</span><h1>Jadwal kegiatan mendatang</h1><PublicEvents /></main></PublicSiteShell>; }

@@ -1,0 +1,11 @@
+"use client";
+import { useState } from "react";
+import CmsCrudManager, { type CrudField } from "@/components/CmsCrudManager";
+
+const groups: Record<string, { label: string; resource: string; fields: CrudField[] }> = {
+  news: { label: "Berita", resource: "news", fields: [{ key: "title", label: "Judul", required: true }, { key: "slug", label: "Slug", required: true }, { key: "excerpt", label: "Ringkasan", type: "textarea" }, { key: "content", label: "Isi Berita", type: "textarea", required: true }, { key: "cover_url", label: "Foto Sampul", upload: "news" }, { key: "is_published", label: "Publikasikan", type: "checkbox" }] },
+  events: { label: "Agenda", resource: "events", fields: [{ key: "title", label: "Judul", required: true }, { key: "starts_at", label: "Mulai", type: "datetime-local", required: true }, { key: "location", label: "Lokasi", required: true }, { key: "description", label: "Deskripsi", type: "textarea" }, { key: "cover_url", label: "Foto", upload: "website" }, { key: "is_published", label: "Publikasikan", type: "checkbox" }] },
+  gallery: { label: "Galeri", resource: "gallery", fields: [{ key: "title", label: "Judul", required: true }, { key: "description", label: "Keterangan", type: "textarea" }, { key: "image_url", label: "Gambar", required: true, upload: "gallery" }, { key: "is_published", label: "Publikasikan", type: "checkbox" }] },
+  pages: { label: "Profil & Halaman", resource: "pages", fields: [{ key: "title", label: "Judul", required: true }, { key: "slug", label: "Slug", required: true, placeholder: "profil, visi, sejarah, struktur" }, { key: "content", label: "Konten", type: "textarea", required: true }, { key: "is_published", label: "Publikasikan", type: "checkbox" }] },
+};
+export default function WebsiteWorkspace() { const [tab, setTab] = useState("news"); const item = groups[tab]; return <><div className="cms-tabs">{Object.entries(groups).map(([key, group]) => <button key={key} className={tab === key ? "active" : ""} onClick={() => setTab(key)}>{group.label}</button>)}</div><CmsCrudManager key={item.resource} resource={item.resource} title={item.label} fields={item.fields} emptyText={`Belum ada ${item.label.toLowerCase()}.`} /></>; }

@@ -1,67 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
-
 export type SocialLink = { label: string; url: string; icon: string };
-
-export type WebsiteSettings = {
-  namaWebsite: string;
-  tagline: string;
-  logoUrl: string;
-  alamat: string;
-  kontak: string;
-  email: string;
-  warnaUtama: string;
-  profilSingkat: string;
-  visi: string;
-  misi: string[];
-  footer: string;
-  socials: SocialLink[];
-};
-
-export const DEFAULT_WEBSITE_SETTINGS: WebsiteSettings = {
-  namaWebsite: "Desa Glagaharum",
-  tagline: "Transformasi Digital Desa Glagaharum",
-  logoUrl: "",
-  alamat: "Kantor Desa Glagaharum, Indonesia",
-  kontak: "0812-0000-0000",
-  email: "info@glagaharum.desa.id",
-  warnaUtama: "#16794a",
-  profilSingkat:
-    "Desa Glagaharum menghadirkan informasi publik, layanan digital, dan etalase UMKM dalam satu portal yang mudah diakses.",
-  visi: "Terwujudnya Desa Glagaharum yang maju, mandiri, inklusif, dan berdaya saing melalui transformasi digital.",
-  misi: [
-    "Menyediakan informasi desa yang terbuka, akurat, dan mudah diakses.",
-    "Menguatkan pelayanan publik berbasis teknologi.",
-    "Mendorong pertumbuhan UMKM dan potensi ekonomi lokal.",
-  ],
-  footer: "© Desa Glagaharum. Seluruh hak dilindungi.",
-  socials: [
-    { label: "Instagram", url: "#", icon: "fa-instagram" },
-    { label: "Facebook", url: "#", icon: "fa-facebook-f" },
-    { label: "YouTube", url: "#", icon: "fa-youtube" },
-  ],
-};
-
-export function initialsFromText(value: string) {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
-
-export function useWebsiteSettings() {
-  const [settings, setSettings] = useState(DEFAULT_WEBSITE_SETTINGS);
-
-  useEffect(() => {
-    fetch("/api/website")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => data?.settings && setSettings((current) => ({ ...current, ...data.settings })))
-      .catch(() => undefined);
-  }, []);
-
-  return { settings, setSettings };
-}
+export type WebsiteSettings = { namaWebsite: string; tagline: string; logoUrl: string; faviconUrl: string; alamat: string; kontak: string; whatsapp: string; email: string; officeHours: string; mapsEmbedUrl: string; warnaUtama: string; profilSingkat: string; visi: string; misi: string[]; footerDescription: string; footerCopyright: string; socials: SocialLink[]; stats: { mode: "auto" | "manual"; population: number; households: number; umkm: number; gallery: number; agenda: number } };
+export const DEFAULT_WEBSITE_SETTINGS: WebsiteSettings = { namaWebsite: "Desa Glagaharum", tagline: "Transformasi Digital Desa Glagaharum", logoUrl: "", faviconUrl: "", alamat: "", kontak: "", whatsapp: "", email: "", officeHours: "", mapsEmbedUrl: "", warnaUtama: "#16794a", profilSingkat: "", visi: "", misi: [], footerDescription: "", footerCopyright: "", socials: [], stats: { mode: "auto", population: 0, households: 0, umkm: 0, gallery: 0, agenda: 0 } };
+export function initialsFromText(value: string) { return value.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }
+export function useWebsiteSettings() { const [settings, setSettings] = useState(DEFAULT_WEBSITE_SETTINGS); useEffect(() => { fetch("/api/website").then((response) => response.ok ? response.json() : null).then((data) => { if (!data?.settings) return; const row = data.settings; const social = row.social_media || {}; const list = [{ label: "Facebook", url: social.facebook, icon: "fa-facebook-f" }, { label: "Instagram", url: social.instagram, icon: "fa-instagram" }, { label: "TikTok", url: social.tiktok, icon: "fa-tiktok" }, { label: "YouTube", url: social.youtube, icon: "fa-youtube" }].filter((item) => item.url); const stats = row.homepage_stats || {}; setSettings((old) => ({ ...old, namaWebsite: row.nama_website || old.namaWebsite, tagline: row.tagline || "", logoUrl: row.logo_url || "", faviconUrl: row.favicon_url || "", alamat: row.alamat || "", kontak: row.phone || "", whatsapp: row.whatsapp || "", email: row.email || "", officeHours: row.office_hours || "", mapsEmbedUrl: row.maps_embed_url || "", footerDescription: row.footer_description || "", footerCopyright: row.footer_copyright || row.footer || "", socials: list, stats: { mode: stats.mode === "manual" ? "manual" : "auto", population: Number(stats.population || 0), households: Number(stats.households || 0), umkm: Number(stats.umkm || 0), gallery: Number(stats.gallery || 0), agenda: Number(stats.agenda || 0) } })); }).catch(() => undefined); }, []); useEffect(() => { if (!settings.faviconUrl) return; let link = document.querySelector<HTMLLinkElement>("link[rel='icon']"); if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); } link.href = settings.faviconUrl; }, [settings.faviconUrl]); return { settings, setSettings }; }

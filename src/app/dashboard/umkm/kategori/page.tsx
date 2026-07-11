@@ -1,3 +1,2 @@
-export default function KategoriPage() {
-  return <h1>Kategori UMKM</h1>;
-}
+import { redirect } from "next/navigation";
+export default function KategoriPage() { redirect("/dashboard/umkm"); }

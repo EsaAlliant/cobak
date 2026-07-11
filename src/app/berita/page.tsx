@@ -1,3 +1,2 @@
-import PublicSiteShell from "@/components/PublicSiteShell";
-const items = ["Musyawarah Desa untuk Rencana Pembangunan 2026", "Pelatihan Kemasan Digital bagi Pelaku UMKM", "Kerja Bakti Warga Menyambut Bulan Kemerdekaan"];
-export default function BeritaPage() { return <PublicSiteShell><main className="container page-section"><span className="eyebrow">Berita Desa</span><h1>Informasi terkini untuk warga</h1><div className="article-grid">{items.map((title, index) => <article className="article-card" key={title}><div className={`article-image image-${index + 1}`} /><span>Berita Desa · 0{index + 1} Jul 2026</span><h2>{title}</h2><p>Ringkasan informasi desa yang akan dikelola oleh administrator melalui CMS.</p><button>Baca berita <i className="fa-solid fa-arrow-right" /></button></article>)}</div></main></PublicSiteShell>; }
+import PublicSiteShell from "@/components/PublicSiteShell"; import { PublicNews } from "@/components/PublicDataViews";
+export default function BeritaPage() { return <PublicSiteShell><main className="container page-section"><span className="eyebrow">Berita Desa</span><h1>Informasi terkini untuk warga</h1><PublicNews /></main></PublicSiteShell>; }

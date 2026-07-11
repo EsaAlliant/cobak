@@ -1,3 +1,2 @@
-import DashboardLayout from "@/components/DashboardLayout";
-import AdminPageHeader from "@/components/AdminPageHeader";
-export default function UsersPage() { return <DashboardLayout><AdminPageHeader eyebrow="Pengguna" title="Manajemen pengguna" description="Buat dan kelola akun Admin serta Operator CMS." action={<button className="button primary"><i className="fa-solid fa-user-plus" /> Tambah User</button>} /><section className="admin-table-card"><div className="empty-state"><i className="fa-solid fa-users" /><h2>Belum ada data pengguna</h2><p>Pengguna yang dibuat di sini akan memperoleh akses melalui Supabase Auth.</p></div></section></DashboardLayout>; }
+import DashboardLayout from "@/components/DashboardLayout"; import AdminPageHeader from "@/components/AdminPageHeader"; import RoleGuard from "@/components/RoleGuard"; import UsersManager from "@/components/UsersManager";
+export default function UsersPage() { return <RoleGuard allowedRoles={["admin"]}><DashboardLayout><AdminPageHeader eyebrow="Pengguna" title="Manajemen pengguna" description="Kelola akun Admin dan Operator dengan aman." /><UsersManager /></DashboardLayout></RoleGuard>; }

@@ -4,17 +4,38 @@ import { getSessionCookie } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import type { UserRole } from "@/lib/roles";
 
-export type CmsTable = "pages" | "news" | "gallery" | "events" | "umkm" | "users" | "categories" | "umkm_products" | "social_media";
+export type CmsTable = "pages" | "news" | "gallery" | "events" | "umkm" | "users" | "categories" | "umkm_products" | "umkm_branding" | "social_media";
 
 async function authorize(roles: UserRole[]) {
   const session = await getSessionCookie();
   return session && roles.includes(session.role) ? session : null;
 }
 
-function errorResponse(error: unknown) { return NextResponse.json({ error: error instanceof Error ? error.message : "Operasi gagal." }, { status: 500 }); }
-
 export async function listCollection(table: CmsTable) {
-  try { const { data, error } = await (getSupabaseAdmin() as any).from(table).select("*").order("created_at", { ascending: false }); if (error) throw error; return NextResponse.json({ data }); } catch (error) { return errorResponse(error); }
+  try {
+    const { data, error } = await (getSupabaseAdmin() as any)
+      .from(table)
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ data });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+function errorResponse(error: unknown) {
+  console.error("CMS API ERROR:", error);
+
+  return NextResponse.json(
+    {
+      error: error instanceof Error ? error.message : String(error),
+      detail: error,
+    },
+    { status: 500 }
+  );
 }
 
 export async function createCollection(request: Request, table: CmsTable, roles: UserRole[]) {
