@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { profileSchema } from "@/lib/validators/users";
+import { compressImage } from "@/lib/image-compression";
 
 type Form = { name: string; email: string; phone: string; password: string; avatar_url: string };
 
@@ -27,7 +28,7 @@ export default function ProfileForm() {
     if (avatar) {
       const data = new FormData();
       data.set("bucket", "branding");
-      data.set("file", avatar);
+      data.set("file", await compressImage(avatar));
       const upload = await fetch("/api/upload", { method: "POST", body: data });
       const body = await upload.json();
       if (!upload.ok) { setError(body.error); return; }

@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { websiteSettingsSchema } from "@/lib/validators/website-settings";
 import { useWebsiteSettings } from "@/lib/site-settings";
+import { compressImage } from "@/lib/image-compression";
 
 type Form = {
   nama_website: string; tagline: string; logo_url: string; favicon_url: string;
@@ -43,7 +44,7 @@ export default function WebsiteSettingsForm() {
 
   const upload = async (file: File) => {
     const data = new FormData();
-    data.set("file", file);
+    data.set("file", await compressImage(file));
     data.set("bucket", "website");
     const response = await fetch("/api/upload", { method: "POST", body: data });
     const body = await response.json();

@@ -1,19 +1,36 @@
 import Link from "next/link";
 import PublicSiteShell from "@/components/PublicSiteShell";
-import HeroSlider from "@/components/HeroSlider";
+import HeroSlider, { type Slide } from "@/components/HeroSlider";
 import PublicPotensiDesa from "@/components/PublicPotensiDesa";
 import {
   PublicFeaturedUmkm,
   PublicLatestNews,
   PublicMetrics,
 } from "@/components/PublicDataViews";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+async function getInitialSlides(): Promise<Slide[]> {
+  try {
+    const result = (await getSupabaseAdmin()
+      .from("hero_slides")
+      .select("*")
+      .order("created_at", { ascending: false })) as unknown as { data: Slide[] | null };
+    return result.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const initialSlides = await getInitialSlides();
+
   return (
     <PublicSiteShell>
       <main>
         {/* Hero */}
-        <HeroSlider />
+        <HeroSlider initialSlides={initialSlides} />
 
         {/* Potensi Desa */}
         <section className="container section">

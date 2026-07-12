@@ -3,6 +3,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import { compressImage } from "@/lib/image-compression";
 import { z } from "zod";
 
 type Value = string | boolean;
@@ -83,7 +85,7 @@ export default function CmsCrudManager({ resource, title, fields, emptyText }: {
     for (const field of fields.filter((item) => item.upload)) {
       const file = files[field.key];
       if (!file || !field.upload) continue;
-      const uploadData = new FormData(); uploadData.set("file", file); uploadData.set("bucket", field.upload);
+      const uploadData = new FormData(); uploadData.set("file", await compressImage(file)); uploadData.set("bucket", field.upload);
       const upload = await fetch("/api/upload", { method: "POST", body: uploadData }); const uploadBody = await upload.json();
       if (!upload.ok) { setMessage(uploadBody.error || "Upload gagal."); return; }
       payload[field.key] = uploadBody.url;
@@ -94,7 +96,25 @@ export default function CmsCrudManager({ resource, title, fields, emptyText }: {
     setOpen(false); await list();
   };
 
-  const remove = async (id: string) => { if (!window.confirm("Hapus data ini?")) return; const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" }); if (!response.ok) { const body = await response.json(); setMessage(body.error || "Gagal menghapus data."); return; } await list(); };
+  const remove = async (id: string) => {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Hapus data ini?",
+      text: "Data yang sudah dihapus tidak bisa dikembalikan.",
+      showCancelButton: true,
+      confirmButtonText: "Ya, hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#c0392b",
+    });
+    if (!result.isConfirmed) return;
+    const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
+    if (!response.ok) {
+      const body = await response.json();
+      setMessage(body.error || "Gagal menghapus data.");
+      return;
+    }
+    await list();
+  };
 
   return <section className="admin-table-card cms-manager"><div className="cms-manager-head"><div><h3>{title}</h3><p>{rows.length} data tercatat</p></div><button className="button primary" onClick={newRecord}><i className="fa-solid fa-plus" /> Tambah</button></div>{message && !open ? <p className="cms-error">{message}</p> : null}<div className="table-responsive"><table className="table align-middle"><thead><tr>{fields.slice(0, 4).map((field) => <th key={field.key}>{field.label}</th>)}<th>Aksi</th></tr></thead><tbody>{rows.length ? rows.map((row) => <tr key={String(row.id)}>{fields.slice(0, 4).map((field) => <td key={field.key}>{field.type === "checkbox" ? (row[field.key] ? "Aktif" : "Nonaktif") : field.type === "password" ? "••••••" : String(row[field.key] || "-").slice(0, 80)}</td>)}<td className="table-actions"><button type="button" className="action-btn edit" onClick={() => editRecord(row)}><i className="fa-solid fa-pen" /> Edit</button><button type="button" className="action-btn delete" onClick={() => void remove(String(row.id))}><i className="fa-solid fa-trash" /> Hapus</button></td></tr>) : <tr><td colSpan={fields.slice(0, 4).length + 1} className="text-center py-5 text-muted">{emptyText}</td></tr>}</tbody></table></div>{open ? <div className="cms-modal-backdrop"><form className="cms-modal" onSubmit={handleSubmit(onSubmit)}><div className="cms-manager-head"><h3>{editing ? "Ubah" : "Tambah"} {title}</h3><button type="button" className="btn-close" onClick={() => setOpen(false)} /></div>{message ? <p className="cms-error">{message}</p> : null}<div className="cms-form-grid">{fields.map((field) => <label key={field.key} className={field.type === "textarea" ? "wide" : ""}>{field.label}{field.type === "checkbox" ? 
   <input type="checkbox" {...register(field.key)} />

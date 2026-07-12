@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
+import { compressImage } from "@/lib/image-compression";
 
 type Form = {
   village_name: string;
@@ -53,7 +54,7 @@ export default function VillageProfileForm() {
 
       if (heroImage) {
         const data = new FormData();
-        data.set("file", heroImage);
+        data.set("file", await compressImage(heroImage));
         data.set("bucket", "website");
         const upload = await fetch("/api/upload", { method: "POST", body: data });
         const body = await upload.json();

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-type Slide = {
+export type Slide = {
   id: string;
   title: string;
   subtitle: string | null;
@@ -17,16 +17,17 @@ type Slide = {
 
 const AUTOPLAY_MS = 6000;
 
-export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slide[] | null>(null);
+export default function HeroSlider({ initialSlides }: { initialSlides?: Slide[] }) {
+  const [slides, setSlides] = useState<Slide[] | null>(initialSlides ?? null);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
+    if (initialSlides) return; // sudah ada data dari server, tidak perlu fetch ulang di client
     fetch("/api/hero-slides")
       .then((response) => (response.ok ? response.json() : null))
       .then((body) => setSlides(body?.data || []))
       .catch(() => setSlides([]));
-  }, []);
+  }, [initialSlides]);
 
   const published = useMemo(
     () =>
