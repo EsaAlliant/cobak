@@ -196,6 +196,13 @@ h1, h2, h3, strong { overflow-wrap:break-word; word-break:normal; }
 
 /* ---- Misc spacing / overflow guards ---- */
 .admin-shell{max-width:100vw}
+.table-actions{display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-end}
+.action-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.action-btn.edit{color:var(--brand);border-color:#bfe4cb}
+.action-btn.edit:hover{background:#eef9f1}
+.action-btn.delete{color:#c0392b;border-color:#f3c6c0}
+.action-btn.delete:hover{background:#fdecea}
+@media(max-width:600px){.action-btn{padding:6px 9px;font-size:.74rem}}
 .admin-nav a{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .admin-brand strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
 .umkm-art-image{display:block;width:100%;height:180px;object-fit:cover}
