@@ -1,9 +1,158 @@
 "use client";
-/* eslint-disable react-hooks/incompatible-library */
-import { useState } from "react";
+/* eslint-disable react-hooks/incompatible-library, @next/next/no-img-element */
+import { useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { websiteSettingsSchema } from "@/lib/validators/website-settings";
 import { useWebsiteSettings } from "@/lib/site-settings";
-type Form = { nama_website: string; tagline: string; logo_url: string; favicon_url: string; alamat: string; phone: string; whatsapp: string; email: string; office_hours: string; maps_embed_url: string; facebook: string; instagram: string; tiktok: string; youtube: string; footer_description: string; footer_copyright: string; stats_mode: "auto" | "manual"; stat_population: number; stat_households: number; stat_umkm: number; stat_gallery: number; stat_agenda: number };
-export default function WebsiteSettingsForm() { const { settings } = useWebsiteSettings(); const { register, handleSubmit, watch, formState: { isSubmitting } } = useForm<Form>({ values: { nama_website: settings.namaWebsite, tagline: settings.tagline, logo_url: settings.logoUrl, favicon_url: settings.faviconUrl, alamat: settings.alamat, phone: settings.kontak, whatsapp: settings.whatsapp, email: settings.email, office_hours: settings.officeHours, maps_embed_url: settings.mapsEmbedUrl, facebook: settings.socials.find((s) => s.label === "Facebook")?.url || "", instagram: settings.socials.find((s) => s.label === "Instagram")?.url || "", tiktok: settings.socials.find((s) => s.label === "TikTok")?.url || "", youtube: settings.socials.find((s) => s.label === "YouTube")?.url || "", footer_description: settings.footerDescription, footer_copyright: settings.footerCopyright, stats_mode: settings.stats.mode, stat_population: settings.stats.population, stat_households: settings.stats.households, stat_umkm: settings.stats.umkm, stat_gallery: settings.stats.gallery, stat_agenda: settings.stats.agenda } }); const [logo, setLogo] = useState<File | null>(null); const [favicon, setFavicon] = useState<File | null>(null); const [error, setError] = useState(""); const upload = async (file: File) => { const data = new FormData(); data.set("file", file); data.set("bucket", "website"); const response = await fetch("/api/upload", { method: "POST", body: data }); const body = await response.json(); if (!response.ok) throw new Error(body.error); return body.url as string; }; const save = async (values: Form) => { const parsed = websiteSettingsSchema.safeParse(values); if (!parsed.success) { setError(parsed.error.issues[0].message); return; } try { if (logo) values.logo_url = await upload(logo); if (favicon) values.favicon_url = await upload(favicon); const response = await fetch("/api/website", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); const body = await response.json(); if (!response.ok) throw new Error(body.error); await Swal.fire({ icon: "success", title: "Pengaturan tersimpan", timer: 1300, showConfirmButton: false }); window.location.reload(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Gagal menyimpan pengaturan."); } }; const manual = watch("stats_mode") === "manual"; return <form className="settings-stack" onSubmit={handleSubmit(save)}>{error && <p className="cms-error">{error}</p>}<section className="settings-card"><h3>Identitas Website</h3><div className="settings-form"><label>Nama Website<input {...register("nama_website")} /></label><label>Tagline<input {...register("tagline")} /></label><label>Logo<input type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] || null)} /></label><label>Favicon<input type="file" accept="image/png,image/x-icon,image/svg+xml" onChange={(e) => setFavicon(e.target.files?.[0] || null)} /></label></div></section><section className="settings-card"><h3>Kontak & Sosial Media</h3><div className="settings-form"><label>Alamat<textarea {...register("alamat")} /></label><label>Jam Operasional<input {...register("office_hours")} /></label><label>Telepon<input {...register("phone")} /></label><label>WhatsApp<input {...register("whatsapp")} /></label><label>Email<input type="email" {...register("email")} /></label><label>Google Maps Embed URL<input type="url" {...register("maps_embed_url")} /></label><label>Facebook<input type="url" {...register("facebook")} /></label><label>Instagram<input type="url" {...register("instagram")} /></label><label>TikTok<input type="url" {...register("tiktok")} /></label><label>YouTube<input type="url" {...register("youtube")} /></label></div></section><section className="settings-card"><h3>Footer</h3><div className="settings-form"><label>Deskripsi Footer<textarea {...register("footer_description")} /></label><label>Copyright<textarea {...register("footer_copyright")} /></label></div></section><section className="settings-card"><h3>Statistik Homepage</h3><div className="settings-form"><label>Mode<select {...register("stats_mode")}><option value="auto">Otomatis dari database</option><option value="manual">Input manual</option></select></label>{manual && <><label>Jumlah Penduduk<input type="number" {...register("stat_population", { valueAsNumber: true })} /></label><label>Jumlah Keluarga<input type="number" {...register("stat_households", { valueAsNumber: true })} /></label><label>Jumlah UMKM<input type="number" {...register("stat_umkm", { valueAsNumber: true })} /></label><label>Jumlah Galeri<input type="number" {...register("stat_gallery", { valueAsNumber: true })} /></label><label>Jumlah Agenda<input type="number" {...register("stat_agenda", { valueAsNumber: true })} /></label></>}</div></section><button className="button primary settings-save" disabled={isSubmitting}>{isSubmitting ? "Menyimpan..." : "Simpan Semua Pengaturan"}</button></form>; }
+
+type Form = {
+  nama_website: string; tagline: string; logo_url: string; favicon_url: string;
+  alamat: string; phone: string; whatsapp: string; email: string; office_hours: string; maps_embed_url: string;
+  facebook: string; instagram: string; tiktok: string; youtube: string;
+  footer_description: string; footer_copyright: string;
+  stats_mode: "auto" | "manual"; stat_population: number; stat_households: number; stat_umkm: number; stat_gallery: number; stat_agenda: number;
+  seo_title: string; seo_description: string; seo_keywords: string; og_image_url: string; google_analytics_id: string; google_search_console: string;
+};
+
+export default function WebsiteSettingsForm() {
+  const { settings } = useWebsiteSettings();
+  const { register, handleSubmit, watch, formState: { isSubmitting } } = useForm<Form>({
+    values: {
+      nama_website: settings.namaWebsite, tagline: settings.tagline, logo_url: settings.logoUrl, favicon_url: settings.faviconUrl,
+      alamat: settings.alamat, phone: settings.kontak, whatsapp: settings.whatsapp, email: settings.email, office_hours: settings.officeHours, maps_embed_url: settings.mapsEmbedUrl,
+      facebook: settings.socials.find((s) => s.label === "Facebook")?.url || "",
+      instagram: settings.socials.find((s) => s.label === "Instagram")?.url || "",
+      tiktok: settings.socials.find((s) => s.label === "TikTok")?.url || "",
+      youtube: settings.socials.find((s) => s.label === "YouTube")?.url || "",
+      footer_description: settings.footerDescription, footer_copyright: settings.footerCopyright,
+      stats_mode: settings.stats.mode, stat_population: settings.stats.population, stat_households: settings.stats.households, stat_umkm: settings.stats.umkm, stat_gallery: settings.stats.gallery, stat_agenda: settings.stats.agenda,
+      seo_title: settings.seo.title, seo_description: settings.seo.description, seo_keywords: settings.seo.keywords, og_image_url: settings.seo.ogImage, google_analytics_id: settings.seo.googleAnalytics, google_search_console: settings.seo.searchConsole,
+    },
+  });
+
+  const [logo, setLogo] = useState<File | null>(null);
+  const [favicon, setFavicon] = useState<File | null>(null);
+  const [ogImage, setOgImage] = useState<File | null>(null);
+  const [error, setError] = useState("");
+
+  // Pratinjau lokal instan saat file dipilih, jatuh ke URL tersimpan bila belum ada file baru.
+  const logoPreview = useMemo(() => (logo ? URL.createObjectURL(logo) : settings.logoUrl), [logo, settings.logoUrl]);
+  const faviconPreview = useMemo(() => (favicon ? URL.createObjectURL(favicon) : settings.faviconUrl), [favicon, settings.faviconUrl]);
+  const ogImagePreview = useMemo(() => (ogImage ? URL.createObjectURL(ogImage) : settings.seo.ogImage), [ogImage, settings.seo.ogImage]);
+
+  const upload = async (file: File) => {
+    const data = new FormData();
+    data.set("file", file);
+    data.set("bucket", "website");
+    const response = await fetch("/api/upload", { method: "POST", body: data });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error);
+    return body.url as string;
+  };
+
+  const save = async (values: Form) => {
+    const parsed = websiteSettingsSchema.safeParse(values);
+    if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
+    try {
+      if (logo) values.logo_url = await upload(logo);
+      if (favicon) values.favicon_url = await upload(favicon);
+      if (ogImage) values.og_image_url = await upload(ogImage);
+      const response = await fetch("/api/website", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error);
+      await Swal.fire({ icon: "success", title: "Pengaturan tersimpan", timer: 1300, showConfirmButton: false });
+      window.location.reload();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Gagal menyimpan pengaturan.");
+    }
+  };
+
+  const manual = watch("stats_mode") === "manual";
+
+  return (
+    <form className="settings-stack" onSubmit={handleSubmit(save)}>
+      {error && <p className="cms-error">{error}</p>}
+
+      <section className="settings-card">
+        <h3>Identitas Website</h3>
+        <div className="settings-form">
+          <label>Nama Website<input {...register("nama_website")} /></label>
+          <label>Tagline<input {...register("tagline")} /></label>
+          <label>
+            Logo
+            <span className="upload-field">
+              <span className="upload-preview">{logoPreview ? <img src={logoPreview} alt="Pratinjau logo" /> : <i className="fa-solid fa-image" />}</span>
+              <input type="file" accept="image/*" onChange={(e) => setLogo(e.target.files?.[0] || null)} />
+            </span>
+          </label>
+          <label>
+            Favicon
+            <span className="upload-field">
+              <span className="upload-preview is-small">{faviconPreview ? <img src={faviconPreview} alt="Pratinjau favicon" /> : <i className="fa-solid fa-star" />}</span>
+              <input type="file" accept="image/png,image/x-icon,image/svg+xml" onChange={(e) => setFavicon(e.target.files?.[0] || null)} />
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section className="settings-card">
+        <h3>Kontak & Sosial Media</h3>
+        <div className="settings-form">
+          <label className="settings-full">Alamat<textarea {...register("alamat")} /></label>
+          <label>Jam Operasional<input {...register("office_hours")} /></label>
+          <label>Telepon<input {...register("phone")} /></label>
+          <label>WhatsApp<input {...register("whatsapp")} /></label>
+          <label>Email<input type="email" {...register("email")} /></label>
+          <label>Google Maps Embed URL<input type="url" {...register("maps_embed_url")} /></label>
+          <label>Facebook<input type="url" {...register("facebook")} /></label>
+          <label>Instagram<input type="url" {...register("instagram")} /></label>
+          <label>TikTok<input type="url" {...register("tiktok")} /></label>
+          <label>YouTube<input type="url" {...register("youtube")} /></label>
+        </div>
+      </section>
+
+      <section className="settings-card">
+        <h3>Footer</h3>
+        <div className="settings-form">
+          <label>Deskripsi Footer<textarea {...register("footer_description")} /></label>
+          <label>Copyright<textarea {...register("footer_copyright")} /></label>
+        </div>
+      </section>
+
+      <section className="settings-card">
+        <h3>Statistik Homepage</h3>
+        <div className="settings-form">
+          <label>Mode<select {...register("stats_mode")}><option value="auto">Otomatis dari database</option><option value="manual">Input manual</option></select></label>
+          {manual && (
+            <>
+              <label>Jumlah UMKM<input type="number" {...register("stat_umkm", { valueAsNumber: true })} /></label>
+              <label>Jumlah Galeri<input type="number" {...register("stat_gallery", { valueAsNumber: true })} /></label>
+              <label>Jumlah Agenda<input type="number" {...register("stat_agenda", { valueAsNumber: true })} /></label>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="settings-card">
+        <h3>SEO & Analytics</h3>
+        <div className="settings-form">
+          <label>Judul Website (SEO)<input placeholder="Nama Desa - Portal Resmi" {...register("seo_title")} /></label>
+          <label>Keywords<input placeholder="desa, umkm, potensi desa" {...register("seo_keywords")} /></label>
+          <label className="settings-full">Meta Description<textarea placeholder="Deskripsi singkat yang tampil di hasil pencarian Google." {...register("seo_description")} /></label>
+          <label>
+            OG Image <small>(gambar saat dibagikan ke media sosial)</small>
+            <span className="upload-field">
+              <span className="upload-preview is-wide">{ogImagePreview ? <img src={ogImagePreview} alt="Pratinjau OG image" /> : <i className="fa-solid fa-image" />}</span>
+              <input type="file" accept="image/*" onChange={(e) => setOgImage(e.target.files?.[0] || null)} />
+            </span>
+          </label>
+          <label>Google Analytics ID<input placeholder="G-XXXXXXXXXX" {...register("google_analytics_id")} /></label>
+          <label>Google Search Console <small>(kode verifikasi)</small><input placeholder="isi meta content dari Search Console" {...register("google_search_console")} /></label>
+        </div>
+      </section>
+
+      <button className="button primary settings-save" disabled={isSubmitting}>{isSubmitting ? "Menyimpan..." : "Simpan Semua Pengaturan"}</button>
+    </form>
+  );
+}

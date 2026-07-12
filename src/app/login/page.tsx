@@ -42,7 +42,7 @@ function LoginForm() {
 
     const { data: profile, error: profileError } = await supabase
       .from("users")
-      .select("id,name,role,is_active")
+      .select("id,name,role,is_active,avatar_url")
       .eq("id", data.user.id)
       .maybeSingle();
 
@@ -64,6 +64,7 @@ function LoginForm() {
       email: data.user.email ?? email,
       name: profile.name,
       role: profile.role,
+      avatarUrl: profile.avatar_url || undefined,
       expiresAt: Date.now() + 1000 * 60 * 60 * 24 * (remember ? 30 : 7),
     };
 
@@ -97,7 +98,7 @@ function LoginForm() {
           </div>
 
           <span className="badge rounded-pill text-bg-primary-subtle text-primary mb-3">Portal Admin</span>
-          <h1 className="h2 fw-bold mb-2">Masuk ke CMS Desa</h1>
+          <h1 className="h2 fw-bold mb-2">Masuk ke CMS {settings.namaWebsite}</h1>
           <p className="text-muted mb-0">
             Kelola konten website, UMKM, pengguna, dan pengaturan desa dari satu tempat.
           </p>

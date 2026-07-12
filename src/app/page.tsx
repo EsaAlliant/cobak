@@ -1,16 +1,109 @@
 import Link from "next/link";
 import PublicSiteShell from "@/components/PublicSiteShell";
-
-const featuredUmkm = ["Kopi Lereng", "Batik Glagaharum", "Dapur Bu Sri"];
-const news = ["Musyawarah Desa untuk Rencana Pembangunan 2026", "Pelatihan Kemasan Digital bagi Pelaku UMKM", "Kerja Bakti Warga Menyambut Bulan Kemerdekaan"];
+import HeroSlider from "@/components/HeroSlider";
+import PublicPotensiDesa from "@/components/PublicPotensiDesa";
+import {
+  PublicFeaturedUmkm,
+  PublicLatestNews,
+  PublicMetrics,
+} from "@/components/PublicDataViews";
 
 export default function HomePage() {
-  return <PublicSiteShell><main>
-    <section className="hero-section"><div className="container hero-grid"><div><span className="eyebrow">Portal Resmi Pemerintah Desa</span><h1>Desa yang tumbuh,<br /><em>terhubung, dan berdaya.</em></h1><p>Informasi publik, potensi lokal, dan layanan digital Desa Glagaharum dalam satu tempat.</p><div className="hero-actions"><Link href="/profil" className="button primary">Mengenal Desa <i className="fa-solid fa-arrow-right" /></Link><Link href="/umkm" className="button secondary">Jelajahi UMKM</Link></div></div><div className="hero-visual"><div className="hero-orb one" /><div className="hero-orb two" /><div className="hero-card"><i className="fa-solid fa-leaf" /><span>Desa Glagaharum</span><strong>Untuk warga, oleh warga.</strong></div></div></div></section>
-    <section className="container section"><div className="section-heading"><span className="eyebrow">Potensi Desa</span><h2>Menguatkan potensi dari akar lokal</h2><p>Glagaharum bergerak dengan semangat gotong royong, ekonomi kreatif, dan keterbukaan informasi.</p></div><div className="feature-grid"><article><i className="fa-solid fa-seedling" /><h3>Pertanian</h3><p>Potensi lahan produktif yang menopang ketahanan pangan desa.</p></article><article><i className="fa-solid fa-store" /><h3>UMKM Lokal</h3><p>Produk pilihan warga yang kini lebih mudah ditemukan secara digital.</p></article><article><i className="fa-solid fa-people-group" /><h3>Gotong Royong</h3><p>Warga yang aktif membangun lingkungan yang aman dan ramah.</p></article></div></section>
-    <section className="metrics-section"><div className="container metrics-grid"><div><strong>1.250+</strong><span>Warga Terlayani</span></div><div><strong>48</strong><span>UMKM Terdaftar</span></div><div><strong>16</strong><span>Dusun Terhubung</span></div><div><strong>12</strong><span>Agenda Tahun Ini</span></div></div></section>
-    <section className="container section"><div className="section-row"><div className="section-heading"><span className="eyebrow">UMKM Unggulan</span><h2>Belanja dari tetangga sendiri</h2></div><Link href="/umkm" className="text-link">Lihat semua UMKM <i className="fa-solid fa-arrow-right" /></Link></div><div className="umkm-grid">{featuredUmkm.map((name, index) => <article key={name} className="umkm-card"><div className={`umkm-art art-${index + 1}`}><i className="fa-solid fa-bag-shopping" /></div><span>Kuliner & Kerajinan</span><h3>{name}</h3><p>Produk unggulan dari Desa Glagaharum.</p></article>)}</div></section>
-    <section className="soft-section"><div className="container section"><div className="section-row"><div className="section-heading"><span className="eyebrow">Berita Terbaru</span><h2>Kabar dari Glagaharum</h2></div><Link href="/berita" className="text-link">Semua berita <i className="fa-solid fa-arrow-right" /></Link></div><div className="news-list">{news.map((title, index) => <article key={title}><span>0{index + 1} JUL 2026</span><h3>{title}</h3><Link href="/berita">Baca selengkapnya <i className="fa-solid fa-arrow-right" /></Link></article>)}</div></div></section>
-    <section className="container section"><div className="map-banner"><div><span className="eyebrow">Peta Digital Desa</span><h2>Temukan lokasi penting dengan mudah</h2><p>Kantor desa, fasilitas umum, tempat ibadah, sekolah, BUMDes, hingga UMKM dalam satu peta digital.</p><Link href="/kontak" className="button primary">Lihat titik lokasi</Link></div><i className="fa-solid fa-map-location-dot" /></div></section>
-  </main></PublicSiteShell>;
+  return (
+    <PublicSiteShell>
+      <main>
+        {/* Hero */}
+        <HeroSlider />
+
+        {/* Potensi Desa */}
+        <section className="container section">
+          <div className="section-heading">
+            <span className="eyebrow">Potensi Desa</span>
+
+            <h2>Menguatkan potensi dari akar lokal</h2>
+
+            <p>
+              Desa bergerak dengan semangat gotong royong,
+              ekonomi kreatif, dan keterbukaan informasi.
+            </p>
+          </div>
+
+          <PublicPotensiDesa />
+        </section>
+
+        {/* Statistik */}
+        <section className="metrics-section">
+          <div className="container metrics-grid">
+            <PublicMetrics />
+          </div>
+        </section>
+
+        {/* UMKM */}
+        <section className="container section">
+          <div className="section-row">
+            <div className="section-heading">
+              <span className="eyebrow">UMKM Unggulan</span>
+
+              <h2>Belanja dari tetangga sendiri</h2>
+            </div>
+
+            <Link href="/umkm" className="text-link">
+              Lihat semua UMKM
+              <i className="fa-solid fa-arrow-right" />
+            </Link>
+          </div>
+
+          <PublicFeaturedUmkm limit={3} />
+        </section>
+
+        {/* Berita */}
+        <section className="soft-section">
+          <div className="container section">
+            <div className="section-row">
+              <div className="section-heading">
+                <span className="eyebrow">Berita Terbaru</span>
+
+                <h2>Kabar dari desa</h2>
+              </div>
+
+              <Link href="/berita" className="text-link">
+                Semua berita
+                <i className="fa-solid fa-arrow-right" />
+              </Link>
+            </div>
+
+            <PublicLatestNews limit={3} />
+          </div>
+        </section>
+
+        {/* Peta */}
+        <section className="container section">
+          <div className="map-banner">
+            <div>
+              <span className="eyebrow">
+                Peta Digital Desa
+              </span>
+
+              <h2>Temukan lokasi penting dengan mudah</h2>
+
+              <p>
+                Kantor desa, fasilitas umum, tempat ibadah,
+                sekolah, BUMDes, hingga UMKM dalam satu peta
+                digital.
+              </p>
+
+              <Link
+                href="/kontak"
+                className="button primary"
+              >
+                Lihat titik lokasi
+              </Link>
+            </div>
+
+            <i className="fa-solid fa-map-location-dot" />
+          </div>
+        </section>
+      </main>
+    </PublicSiteShell>
+  );
 }

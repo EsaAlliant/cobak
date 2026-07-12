@@ -7,6 +7,7 @@ type ProfileRow = {
   name: string;
   role: string;
   is_active?: boolean | null;
+  avatar_url?: string | null;
 };
 
 export async function getSessionCookie(): Promise<SessionPayload | null> {
@@ -25,7 +26,7 @@ export async function getActiveProfileSession() {
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from("users")
-    .select("id,name,role,is_active")
+    .select("id,name,role,is_active,avatar_url")
     .eq("id", session.userId)
     .single<ProfileRow>();
 
@@ -38,6 +39,7 @@ export async function getActiveProfileSession() {
       ...session,
       name: data.name ?? session.name,
       role: (data.role as SessionPayload["role"]) ?? session.role,
+      avatarUrl: data.avatar_url ?? session.avatarUrl,
     },
     profile: data,
   };

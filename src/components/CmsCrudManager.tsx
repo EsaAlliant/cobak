@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps, @next/next/no-img-element */
 
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -40,7 +40,7 @@ export default function CmsCrudManager({ resource, title, fields, emptyText }: {
     Record<string, { label: string; value: string }[]>
   >({});
   const [message, setMessage] = useState("");
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<Values>();
+  const { register, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm<Values>();
   const endpoint = `/api/${resource}`;
 
   const list = async () => { const response = await fetch(endpoint); const body = await response.json(); if (response.ok) setRows(body.data || []); else setMessage(body.error || "Gagal memuat data."); };
@@ -128,16 +128,25 @@ export default function CmsCrudManager({ resource, title, fields, emptyText }: {
     />
 
     {field.upload ? (
-      <input
-        type="file"
-        accept="image/*,.pdf"
-        onChange={(event) =>
-          setFiles((current) => ({
-            ...current,
-            [field.key]: event.target.files?.[0] || null,
-          }))
-        }
-      />
+      <span className="upload-field">
+        <span className="upload-preview">
+          {(() => {
+            const currentFile = files[field.key];
+            const currentUrl = currentFile ? URL.createObjectURL(currentFile) : (watch(field.key) as string | undefined);
+            return currentUrl ? <img src={currentUrl} alt="" /> : <i className="fa-solid fa-image" />;
+          })()}
+        </span>
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          onChange={(event) =>
+            setFiles((current) => ({
+              ...current,
+              [field.key]: event.target.files?.[0] || null,
+            }))
+          }
+        />
+      </span>
     ) : null}
   </>
   }</label>)}</div><div className="cms-modal-actions"><button type="button" className="button secondary" onClick={() => setOpen(false)}>Batal</button><button className="button primary" disabled={isSubmitting}>{isSubmitting ? "Menyimpan..." : "Simpan"}</button></div></form></div> : null}</section>;

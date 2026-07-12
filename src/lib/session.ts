@@ -7,6 +7,7 @@ export type SessionUser = {
   email: string;
   name: string;
   role: UserRole;
+  avatarUrl?: string;
 };
 
 export type SessionPayload = SessionUser & {

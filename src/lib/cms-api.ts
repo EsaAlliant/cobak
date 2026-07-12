@@ -4,7 +4,7 @@ import { getSessionCookie } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import type { UserRole } from "@/lib/roles";
 
-export type CmsTable = "pages" | "news" | "gallery" | "events" | "umkm" | "users" | "categories" | "umkm_products" | "umkm_branding" | "social_media";
+export type CmsTable = "pages" | "news" | "gallery" | "events" | "umkm" | "users" | "categories" | "umkm_products" | "umkm_branding" | "social_media" | "hero_slides" | "struktur_organisasi";
 
 async function authorize(roles: UserRole[]) {
   const session = await getSessionCookie();
@@ -29,9 +29,16 @@ export async function listCollection(table: CmsTable) {
 function errorResponse(error: unknown) {
   console.error("CMS API ERROR:", error);
 
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null && "message" in error && typeof (error as { message: unknown }).message === "string"
+        ? (error as { message: string }).message
+        : String(error);
+
   return NextResponse.json(
     {
-      error: error instanceof Error ? error.message : String(error),
+      error: message,
       detail: error,
     },
     { status: 500 }

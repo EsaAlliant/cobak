@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     email: body.email,
     name: body.name,
     role: body.role,
+    avatarUrl: body.avatarUrl,
     expiresAt: Date.now() + maxAge * 1000,
   };
 
@@ -48,13 +49,14 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, error: "Session tidak ditemukan" }, { status: 401 });
     }
 
-    const body = (await request.json()) as Partial<Pick<SessionPayload, "email" | "name" | "role">>;
+    const body = (await request.json()) as Partial<Pick<SessionPayload, "email" | "name" | "role" | "avatarUrl">>;
 
     const payload: SessionPayload = {
       ...current,
       email: body.email ?? current.email,
       name: body.name ?? current.name,
       role: (body.role ?? current.role) as SessionPayload["role"],
+      avatarUrl: body.avatarUrl ?? current.avatarUrl,
     };
 
     const response = NextResponse.json({ ok: true, session: payload });
