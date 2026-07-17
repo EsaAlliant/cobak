@@ -40,48 +40,36 @@ function LoginForm() {
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from("users")
-      .select("id,name,role,is_active,avatar_url")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    if (profileError || !profile) {
-      setError("Data pengguna tidak ditemukan atau belum aktif.");
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      setError("Gagal mendapatkan token akses. Coba login ulang.");
       setLoading(false);
       return;
     }
 
-    if (profile.is_active === false) {
-      await supabase.auth.signOut();
-      setError("Akun ini dinonaktifkan oleh admin.");
-      setLoading(false);
-      return;
-    }
-
-    const sessionPayload: SessionPayload = {
-      userId: profile.id,
-      email: data.user.email ?? email,
-      name: profile.name,
-      role: profile.role,
-      avatarUrl: profile.avatar_url || undefined,
-      expiresAt: Date.now() + 1000 * 60 * 60 * 24 * (remember ? 30 : 7),
-    };
-
+    // Server yang menentukan identitas & role (diverifikasi ulang lewat
+    // access_token + database) -- klien tidak lagi "menitipkan" role/nama
+    // sendiri ke server.
     const sessionResponse = await fetch("/api/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...sessionPayload, remember }),
+      body: JSON.stringify({ access_token: accessToken, remember }),
     });
 
-    if (!sessionResponse.ok) {
-      setError("Session gagal dibuat. Cek SESSION_SECRET dan konfigurasi server.");
+    const sessionBody = (await sessionResponse.json().catch(() => null)) as
+      | { ok: true; session: SessionPayload }
+      | { ok: false; error?: string }
+      | null;
+
+    if (!sessionResponse.ok || !sessionBody || sessionBody.ok !== true) {
+      const message = sessionBody && sessionBody.ok === false ? sessionBody.error : undefined;
+      setError(message || "Session gagal dibuat. Cek konfigurasi server.");
       setLoading(false);
       return;
     }
 
-    setClientSessionCache(sessionPayload);
-    setSession(sessionPayload);
+    setClientSessionCache(sessionBody.session);
+    setSession(sessionBody.session);
     router.replace(nextUrl);
   };
 

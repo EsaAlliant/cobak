@@ -14,8 +14,18 @@ export type SessionPayload = SessionUser & {
   expiresAt: number;
 };
 
-const FALLBACK_SESSION_SECRET = "desa-glagaharum-dev-session-secret-change-me";
-const SESSION_SECRET = process.env.SESSION_SECRET || process.env.NEXTAUTH_SECRET || FALLBACK_SESSION_SECRET;
+// PENTING: SESSION_SECRET WAJIB di-set sebagai Environment Variable di Vercel
+// (Settings -> Environment Variables), nilai acak & panjang (mis. `openssl rand -hex 32`).
+// Tidak ada fallback hardcoded lagi -- kalau env var ini kosong, aplikasi akan
+// gagal start dengan error yang jelas, alih-alih diam-diam memakai kunci yang
+// bisa ditebak siapa saja yang membaca kode sumbernya.
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.NEXTAUTH_SECRET;
+
+if (!SESSION_SECRET) {
+  throw new Error(
+    "SESSION_SECRET belum diatur. Set environment variable SESSION_SECRET di Vercel (Project Settings -> Environment Variables) dengan nilai acak yang panjang, lalu redeploy."
+  );
+}
 
 let cachedKey: CryptoKey | null = null;
 let cachedKeyPromise: Promise<CryptoKey> | null = null;
@@ -77,14 +87,20 @@ export async function encodeSession(payload: SessionPayload) {
 export async function decodeSession(raw?: string | null): Promise<SessionPayload | null> {
   if (!raw) return null;
   try {
-    const [payload, signature] = raw.split(".");
-    if (payload && signature) {
-      const expected = await sign(payload);
-      if (!timingSafeEqual(signature, expected)) return null;
-      return JSON.parse(new TextDecoder().decode(base64UrlToBytes(payload))) as SessionPayload;
-    }
+    // Format wajib: "<payload-base64url>.<signature-base64url>". Ambil bagian
+    // pertama sebagai payload dan SISA string (bukan cuma split[1]) sebagai
+    // signature, supaya payload yang mengandung karakter "." tidak salah potong.
+    const dotIndex = raw.indexOf(".");
+    if (dotIndex === -1) return null;
 
-    return JSON.parse(decodeURIComponent(raw)) as SessionPayload;
+    const payload = raw.slice(0, dotIndex);
+    const signature = raw.slice(dotIndex + 1);
+    if (!payload || !signature) return null;
+
+    const expected = await sign(payload);
+    if (!timingSafeEqual(signature, expected)) return null;
+
+    return JSON.parse(new TextDecoder().decode(base64UrlToBytes(payload))) as SessionPayload;
   } catch {
     return null;
   }
